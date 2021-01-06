@@ -159,12 +159,10 @@ function sanitizeText(chars) {
   return buf.join('');
 }
 
-function sanitizeLowercase(char) {
-  return (char || '').toLowerCase();
-}
 
 // Regular Expressions for parsing tags and attributes
-var START_TAG_REGEXP = /^<((?:[a-zA-Z])[\w:-]*)((?:\s+[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)\s*(>?)/,
+var START_TAG_REGEXP =
+       /^<((?:[a-zA-Z])[\w:-]*)((?:\s+[\w:-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)\s*(>?)/,
   END_TAG_REGEXP = /^<\/\s*([\w:-]+)[^>]*>/,
   ATTR_REGEXP = /([\w:-]+)(?:\s*=\s*(?:(?:"((?:[^"])*)")|(?:'((?:[^'])*)')|([^>\s]+)))?/g,
   BEGIN_TAG_REGEXP = /^</,
@@ -380,7 +378,7 @@ function htmlParser(html, handler) {
   parseEndTag();
 
   function parseStartTag(tag, tagName, rest, unary) {
-    tagName = sanitizeLowercase(tagName);
+    tagName = angular.lowercase(tagName);
     if (blockElements[ tagName ]) {
       while (stack.last() && inlineElements[ stack.last() ]) {
         parseEndTag("", stack.last());
@@ -412,7 +410,7 @@ function htmlParser(html, handler) {
 
   function parseEndTag(tag, tagName) {
     var pos = 0, i;
-    tagName = sanitizeLowercase(tagName);
+    tagName = angular.lowercase(tagName);
     if (tagName)
       // Find the closest opened tag of the same type
       for (pos = stack.length - 1; pos >= 0; pos--)
@@ -525,8 +523,8 @@ function validStyles(styleAttr){
 	angular.forEach(styleArray, function(value){
 		var v = value.split(':');
 		if(v.length == 2){
-			var key = trim(sanitizeLowercase(v[0]));
-			var full_value = trim(sanitizeLowercase(v[1]));
+			var key = trim(angular.lowercase(v[0]));
+			var full_value = trim(angular.lowercase(v[1]));
 			var split_value = full_value.match(/^(.*?)\s*(!important)?$/);
 			var value = trim(split_value[1]); // 0 index is the full thing, 1 is the stuff before "!important" (which need not exist)
 			if(
@@ -660,7 +658,7 @@ function htmlSanitizeWriter(buf, uriValidator) {
   var out = angular.bind(buf, buf.push);
   return {
     start: function(tag, attrs, unary) {
-      tag = sanitizeLowercase(tag);
+      tag = angular.lowercase(tag);
       if (!ignore && specialElements[tag]) {
         ignore = tag;
       }
@@ -668,7 +666,7 @@ function htmlSanitizeWriter(buf, uriValidator) {
         out('<');
         out(tag);
         angular.forEach(attrs, function(value, key) {
-          var lkey=sanitizeLowercase(key);
+          var lkey=angular.lowercase(key);
           var isImage=(tag === 'img' && lkey === 'src') || (lkey === 'background');
           if ((lkey === 'style' && (value = validStyles(value)) !== '') || validCustomTag(tag, attrs, lkey, value) || validAttrs[lkey] === true &&
             (uriAttrs[lkey] !== true || uriValidator(value, isImage))) {
@@ -689,7 +687,7 @@ function htmlSanitizeWriter(buf, uriValidator) {
       out(encodeEntities(ws));
     },
     end: function(tag) {
-        tag = sanitizeLowercase(tag);
+        tag = angular.lowercase(tag);
         if (!ignore && validElements[tag] === true) {
           out('</');
           out(tag);
